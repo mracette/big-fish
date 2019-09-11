@@ -1,20 +1,45 @@
-import { lerp } from '../utils/utils';
+import { lerp, lerpColor, hexToRgb, rgbToHex } from '../utils/utils';
+import { nx, ny, colorPalette } from '../globals/globals'; 
+
+export function generateJumperParams() {
+
+    const minSize = ny(1);
+    const maxSize = ny(3);
+    const size = minSize + maxSize * Math.random();
+    const cycleTime = 2500 + size * 10;
+    const speed = Math.min(.1, Math.random() * 0.5 + size / 120)
+    const direction = Math.random() >= .5 ? 'left' : 'right';
+    const x = direction === 'right' ? - size : nx(100) + size;
+    const y = Math.random() * ny(100);
+
+    // colors come from the size and the array in the colorpalette object
+    const colorOne = hexToRgb(colorPalette.jumperFish[0]);
+    const colorTwo = hexToRgb(colorPalette.jumperFish[1]);
+    const lerpAmount = (size - minSize) / (maxSize - minSize);
+    
+    const color = rgbToHex(lerpColor(colorOne, colorTwo, lerpAmount));
+
+    return { size, cycleTime, speed, x, y, direction, color};
+
+}
 
 export class Jumper {
 
-    constructor(size, x, y, scrolldirection) {
+    constructor(size, cycleTime, speed, x, y, direction, color) {
 
-        this.cycleTime = 2800;
+        this.cycleTime = cycleTime;
 
-        this.scrolldirection = scrolldirection
-        
+        this.direction = direction
+        this.color = color;
+
         this.size = size;
         this.vertices = 4;
 
         this.x = x;
         this.y = y;
-        this.vx = 0.1;
-        this.vy = 0.1;
+        this.vx = speed;
+
+        this.collision;
 
         this.state = [
             {
@@ -26,7 +51,7 @@ export class Jumper {
             {
                 start: .2,
                 end: .99,
-                speed: this.vx * 4.5,
+                speed: this.vx * 5,
                 value: 'jump'
             },
             {
@@ -59,6 +84,8 @@ export class Jumper {
         }
 
         this.currentCoords;
+        this.diameter;
+        this.dispose;
 
     }
 
@@ -100,7 +127,7 @@ export class Jumper {
                 // vx
                 const dvx = lerp(stateOne.speed, stateTwo.speed, lerpAmount);
 
-                if(this.scrolldirection === 'left') {
+                if(this.direction === 'left') {
                     this.x -= dvx;
                 } else {
                     this.x += dvx;
@@ -119,7 +146,7 @@ export class Jumper {
                 // vx
                 const dvx = stateOne.speed;
 
-                if(this.scrolldirection === 'left') {
+                if(this.direction === 'left') {
                     this.x -= dvx;
                 } else {
                     this.x += dvx;
@@ -140,9 +167,53 @@ export class Jumper {
 
     }
 
-    render(ctx, time) {
+    collisionDetection(x, y, radius) {
+
+        for(let i = 0; i < this.currentCoords.length - 1; i++) {
+
+            const dd = radius * radius;
+
+            // TODO: optimize using distance squared?
+            let xx = Math.pow(x - this.currentCoords[i][0], 2);
+            let yy = Math.pow(y - this.currentCoords[i][1], 2);
+
+            if(xx + yy < dd){return true;}
+
+            // check mid point between this coord and the next
+            const xAvg = (this.currentCoords[i][0] + this.currentCoords[i+1][0]) / 2
+            const yAvg = (this.currentCoords[i][1] + this.currentCoords[i+1][1]) / 2
+        
+            xx = (x - xAvg) * (x - xAvg);
+            yy = (y - yAvg) * (y - yAvg);
+
+            if(xx + yy < dd){return true;}
+            
+        }
+
+        return false
+
+    }
+
+    calculateDiameter() {
+        // reference: area of a rhombus
+        const w = Math.abs(this.currentCoords[0][0] - this.currentCoords[2][0])
+        const h = Math.abs(this.currentCoords[1][1] - this.currentCoords[2][1])
+        return Math.max(w, h);
+    }
+
+    render(ctx, time, px, py, radius) {
 
         this.reposition(time);
+        this.diameter = this.calculateDiameter();
+
+        if(this.x + this.size < nx(0) || this.x - this.size > nx(100)){this.dispose = true;}
+
+        // TODO: fix this pretty shoddy check?
+        if(Math.abs(px - this.x) < this.size * 4 || Math.abs(py - this.y) < this.size * 4) {
+            this.collision = this.collisionDetection(px, py, radius);
+        }
+
+        ctx.fillStyle = this.color;
 
         ctx.beginPath();
         this.currentCoords.map((c, i) => {

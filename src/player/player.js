@@ -1,11 +1,10 @@
-import { pl, canvas, ctx, height, width, colorPalette } from '../globals/globals';
-import { lerp, rotatePoint } from '../utils/utils';
+import { ny, nx, pl, canvas, ctx, height, width, colorPalette } from '../globals/globals';
+import { lerp, lerpColor, hexToRgb, rgbToHex, rotatePoint } from '../utils/utils';
 
 function drawPlayer() {
 
-    ctx.fillStyle = colorPalette.goldFishTwo;
-
     // draw circle
+    ctx.fillStyle = colorPalette.goldFishTwo;
     ctx.beginPath();
     ctx.arc(pl.x, pl.y, pl.radius, 0, Math.PI*2);
     ctx.fill();
@@ -33,7 +32,6 @@ function drawPlayer() {
         }
     });
 
-    //ctx.stroke();
     ctx.fill(); 
     ctx.closePath();
     ctx.save();

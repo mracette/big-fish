@@ -1,15 +1,40 @@
-import { lerp, rotatePoint } from '../utils/utils';
+import { lerpColor, rotatePoint, hexToRgb, rgbToHex } from '../utils/utils';
+import { nx, ny, colorPalette } from '../globals/globals'; 
+
+export function generateSimpleParams() {
+
+    const minSize = ny(1);
+    const maxSize = ny(6);
+    const size = minSize + maxSize * Math.random();
+    const cycleTime = 30 + size;
+    const speed = 2 - size / 100 + Math.random();
+    const direction = Math.random() >= .5 ? 'left' : 'right';
+    const x = direction === 'right' ? - size : nx(100) + size;
+    const y = Math.random() * ny(100);
+
+    // colors come from the size and the array in the colorpalette object
+    const colorOne = hexToRgb(colorPalette.simpleFish[0]);
+    const colorTwo = hexToRgb(colorPalette.simpleFish[1]);
+    const lerpAmount = (size - minSize) / (maxSize - minSize);
+    
+    const color = rgbToHex(lerpColor(colorOne, colorTwo, lerpAmount));
+
+    return { size, cycleTime, speed, x, y, direction, color};
+
+}
 
 export class Simple {
 
-    constructor(size, cycleTime, speed, x, y, scrolldirection) {
+    constructor(size, cycleTime, speed, x, y, direction, color) {
 
         this.size = size;
+        this.diameter = size * 2;
         this.cycleTime = cycleTime;
         this.vx = speed;
         this.x = x;
         this.y = y;
-        this.scrolldirection = scrolldirection;
+        this.direction = direction;
+        this.color = color;
         
         this.vertices = 4;
         this.tailSide = this.size * 1.3;
@@ -23,29 +48,29 @@ export class Simple {
         ];
 
         this.currentCoords;
+        this.collision;
+        this.dispose = false;
 
     }
 
     reposition(time) {
-
-        const cyclePosition = (time % this.cycleTime) / this.cycleTime;
         
         const currentCoords = [];
 
-        if(this.scrolldirection === 'left') {
+        if(this.direction === 'left') {
             this.x -= this.vx;
         } else {
             this.x += this.vx;
         }
         
         this.coords.map((c, i) => {
-            // x value
+
             const initialX = this.x + c[0];
             const initialY = this.y + c[1];
 
             let rotationBase;
 
-            if(this.scrolldirection === 'left') {
+            if(this.direction === 'left') {
                 rotationBase = - Math.PI / 2;
             } else {
                 rotationBase = Math.PI / 2;
@@ -56,7 +81,6 @@ export class Simple {
             const rotatedPoint = rotatePoint(initialX, initialY, this.x, this.y, rotationBase + rotationDelta);
 
             currentCoords.push([rotatedPoint.x, rotatedPoint.y]);
-            //currentCoords.push([initialX, initialY]);
 
         })
 
@@ -64,11 +88,31 @@ export class Simple {
 
     }
 
-    render(ctx, time) {
+    collisionDetection(x, y, radius) {
+
+        const xx = (this.x - x) * (this.x - x)
+        const yy = (this.y - y) * (this.y - y)
+        const dd = xx + yy;
+        const rr = (this.size + radius) * (this.size + radius);
+
+        if(dd < rr) {this.collision = true;} else {
+            this.collision = false;
+        }
+
+    }
+
+    render(ctx, time, x, y, radius) {
 
         this.reposition(time);
 
-        // // draw circle
+        if(this.x + this.size < nx(0) || this.x - this.size > nx(100)){this.dispose = true;}
+
+        if(Math.abs(this.x - x) < radius * 4 || Math.abs(this.y - y) < radius * 4) {
+            this.collisionDetection(x, y, radius);
+        }
+
+        // draw circle
+        ctx.fillStyle = this.color;
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.size, 0, Math.PI*2);
         ctx.fill();
