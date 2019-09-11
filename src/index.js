@@ -2,6 +2,7 @@ import { ny, pl, en, enpr, se, canvas, ctx, height, width, colorPalette } from '
 import { drawPlayer, repositionPlayer } from './player/player';
 import { Jumper, generateJumperParams } from './enemies/Jumper';
 import { Simple, generateSimpleParams } from './enemies/Simple';
+import { Puffer, generatePufferParams } from './enemies/Puffer';
 
 import Stats from 'stats.js';
 const stats = new Stats();
@@ -13,7 +14,8 @@ function init() {
     canvas.height = height;
     canvas.width = width;
 
-    en.push(new Jumper(ny(6), 2500, .1, 0, ny(50), 'right', colorPalette.jumperFish[1]))
+    //en.push(new Jumper(ny(6), 2500, .1, 0, ny(50), 'right', colorPalette.jumperFish[1]))
+    //en.push(new Puffer(ny(6), 14000, .3, 0, ny(50), 'right', colorPalette.pufferFish[0]))
 
     stats.showPanel(0);
     document.body.append( stats.dom );
@@ -53,6 +55,10 @@ function render(time) {
                 en.push(new Jumper(size, cycleTime, speed, x, y, direction, color));
                 break;
             }
+            case 'puffer': {
+                const { size, cycleTime, speed, x, y, direction, color } = generatePufferParams();
+                en.push(new Puffer(size, cycleTime, speed, x, y, direction, color));
+            }
         }
     }
 
@@ -64,11 +70,16 @@ function render(time) {
         if(enemy.collision) {
             console.log(enemy.diameter, pl.diameter);
             if(enemy.diameter < pl.diameter) {
-                pl.radius += enemy.diameter / 10;
+                pl.radius += enemy.diameter / 20;
                 pl.diameter = pl.radius * 2;
                 enemyRemovalArray.push(i);
+                se.fishEaten ++;
+                se.score += 1000 * enemy.diameter / ny(100);
+                se.progress = pl.diameter / ny(100);
+                updateStats();
                 console.log('mmmmm');
             } else {
+                // alert('ow');
                 console.log('owwww');
             }
         }
@@ -81,11 +92,16 @@ function render(time) {
         en.splice(enemyRemovalArray[i], 1);
     }
     
-    console.log(enemyRemovalArray, en.length);
     
     stats.end();
 
     requestAnimationFrame(render);
+}
+
+function updateStats() {
+    document.getElementById('count').innerText = se.fishEaten;
+    document.getElementById('score').innerText = Number(Math.round(se.score)).toLocaleString('en');
+    document.getElementById('progress').style.width = `${se.progress * 6}vw`;
 }
 
 function addListeners() {

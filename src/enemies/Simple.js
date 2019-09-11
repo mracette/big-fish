@@ -1,23 +1,26 @@
-import { lerpColor, rotatePoint, hexToRgb, rgbToHex } from '../utils/utils';
+import { lerpColorHex, rotatePoint, hexToRgb, rgbToHex, cividis } from '../utils/utils';
 import { nx, ny, colorPalette } from '../globals/globals'; 
 
 export function generateSimpleParams() {
 
     const minSize = ny(1);
-    const maxSize = ny(6);
-    const size = minSize + maxSize * Math.random();
+    const maxSize = ny(7);
+    const size = minSize + ny(6) * Math.random();
     const cycleTime = 30 + size;
-    const speed = 2 - size / 100 + Math.random();
+    const speed = nx(0.05) - size / 100 + Math.random() * nx(0.075);
     const direction = Math.random() >= .5 ? 'left' : 'right';
     const x = direction === 'right' ? - size : nx(100) + size;
     const y = Math.random() * ny(100);
 
     // colors come from the size and the array in the colorpalette object
-    const colorOne = hexToRgb(colorPalette.simpleFish[0]);
-    const colorTwo = hexToRgb(colorPalette.simpleFish[1]);
+    // const colorOne = hexToRgb(colorPalette.simpleFish[0]);
+    // const colorTwo = hexToRgb(colorPalette.simpleFish[1]);
     const lerpAmount = (size - minSize) / (maxSize - minSize);
+    console.log(lerpAmount);
     
-    const color = rgbToHex(lerpColor(colorOne, colorTwo, lerpAmount));
+    const color = rgbToHex(lerpColorHex(lerpAmount, colorPalette.testing));// cividis(1 - lerpAmount);// rgbToHex(lerpColor(colorOne, colorTwo, lerpAmount));
+
+    console.log(color);
 
     return { size, cycleTime, speed, x, y, direction, color};
 
@@ -101,14 +104,14 @@ export class Simple {
 
     }
 
-    render(ctx, time, x, y, radius) {
+    render(ctx, time, px, py, radius) {
 
         this.reposition(time);
 
         if(this.x + this.size < nx(0) || this.x - this.size > nx(100)){this.dispose = true;}
 
-        if(Math.abs(this.x - x) < radius * 4 || Math.abs(this.y - y) < radius * 4) {
-            this.collisionDetection(x, y, radius);
+        if(Math.abs(this.x - px) < radius * 4 || Math.abs(this.y - py) < radius * 4) {
+            this.collisionDetection(px, py, radius);
         }
 
         // draw circle

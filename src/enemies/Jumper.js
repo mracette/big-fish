@@ -1,13 +1,13 @@
-import { lerp, lerpColor, hexToRgb, rgbToHex } from '../utils/utils';
+import { lerp, lerpColorRgb, hexToRgb, rgbToHex } from '../utils/utils';
 import { nx, ny, colorPalette } from '../globals/globals'; 
 
 export function generateJumperParams() {
 
-    const minSize = ny(1);
-    const maxSize = ny(3);
+    const minSize = ny(3);
+    const maxSize = ny(6.5);
     const size = minSize + maxSize * Math.random();
     const cycleTime = 2500 + size * 10;
-    const speed = Math.min(.1, Math.random() * 0.5 + size / 120)
+    const speed = nx(0.008);
     const direction = Math.random() >= .5 ? 'left' : 'right';
     const x = direction === 'right' ? - size : nx(100) + size;
     const y = Math.random() * ny(100);
@@ -17,7 +17,7 @@ export function generateJumperParams() {
     const colorTwo = hexToRgb(colorPalette.jumperFish[1]);
     const lerpAmount = (size - minSize) / (maxSize - minSize);
     
-    const color = rgbToHex(lerpColor(colorOne, colorTwo, lerpAmount));
+    const color = rgbToHex(lerpColorRgb(colorOne, colorTwo, lerpAmount));
 
     return { size, cycleTime, speed, x, y, direction, color};
 
@@ -177,7 +177,7 @@ export class Jumper {
             let xx = Math.pow(x - this.currentCoords[i][0], 2);
             let yy = Math.pow(y - this.currentCoords[i][1], 2);
 
-            if(xx + yy < dd){return true;}
+            if(xx + yy < dd ){return true;}
 
             // check mid point between this coord and the next
             const xAvg = (this.currentCoords[i][0] + this.currentCoords[i+1][0]) / 2
