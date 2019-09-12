@@ -79,12 +79,8 @@ export function lerpColorHex(amount, colorArray) {
 
     const l = (amount - bucketStart) / (bucketEnd - bucketStart);
 
-    
     const a = hexToRgb(colorArray[bucket - 1]);
     const b = hexToRgb(colorArray[bucket]);
-    
-    console.log(bucketStart, bucketEnd, amount);
-    console.log(amount, bucket, colorArray, a, b, l);
 
     return [
         Math.round(a[0]*(1-l)+b[0]*(l)),

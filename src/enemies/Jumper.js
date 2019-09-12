@@ -201,18 +201,7 @@ export class Jumper {
         return Math.max(w, h);
     }
 
-    render(ctx, time, px, py, radius) {
-
-        this.reposition(time);
-        this.diameter = this.calculateDiameter();
-
-        if(this.x + this.size < nx(0) || this.x - this.size > nx(100)){this.dispose = true;}
-
-        // TODO: fix this pretty shoddy check?
-        if(Math.abs(px - this.x) < this.size * 4 || Math.abs(py - this.y) < this.size * 4) {
-            this.collision = this.collisionDetection(px, py, radius);
-        }
-
+    draw(ctx) {
         ctx.fillStyle = this.color;
 
         ctx.beginPath();
@@ -225,6 +214,22 @@ export class Jumper {
         });
         ctx.fill();
         ctx.closePath();
+    }
+
+    render(ctx, time, px, py, radius) {
+
+        this.reposition(time);
+        this.diameter = this.calculateDiameter();
+
+        if(this.x + this.size < nx(0) || this.x - this.size > nx(100)){this.dispose = true;}
+
+        // TODO: fix this pretty shoddy check?
+        if(Math.abs(px - this.x) < this.size * 4 || Math.abs(py - this.y) < this.size * 4) {
+            this.collision = this.collisionDetection(px, py, radius);
+        }
+
+        this.draw(ctx);
+
     }
     
 }

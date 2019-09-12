@@ -16,11 +16,8 @@ export function generateSimpleParams() {
     // const colorOne = hexToRgb(colorPalette.simpleFish[0]);
     // const colorTwo = hexToRgb(colorPalette.simpleFish[1]);
     const lerpAmount = (size - minSize) / (maxSize - minSize);
-    console.log(lerpAmount);
     
     const color = rgbToHex(lerpColorHex(lerpAmount, colorPalette.testing));// cividis(1 - lerpAmount);// rgbToHex(lerpColor(colorOne, colorTwo, lerpAmount));
-
-    console.log(color);
 
     return { size, cycleTime, speed, x, y, direction, color};
 
@@ -104,16 +101,7 @@ export class Simple {
 
     }
 
-    render(ctx, time, px, py, radius) {
-
-        this.reposition(time);
-
-        if(this.x + this.size < nx(0) || this.x - this.size > nx(100)){this.dispose = true;}
-
-        if(Math.abs(this.x - px) < radius * 4 || Math.abs(this.y - py) < radius * 4) {
-            this.collisionDetection(px, py, radius);
-        }
-
+    draw(ctx) {
         // draw circle
         ctx.fillStyle = this.color;
         ctx.beginPath();
@@ -133,6 +121,19 @@ export class Simple {
 
         ctx.fill(); 
         ctx.closePath();
+    }
+
+    render(ctx, time, px, py, radius) {
+
+        this.reposition(time);
+
+        if(this.x + this.size < nx(0) || this.x - this.size > nx(100)){this.dispose = true;}
+
+        if(Math.abs(this.x - px) < radius * 4 || Math.abs(this.y - py) < radius * 4) {
+            this.collisionDetection(px, py, radius);
+        }
+
+        this.draw(ctx);
 
     }
     
