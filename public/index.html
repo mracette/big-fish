@@ -7,7 +7,7 @@
     </head>
     <style>
         body{
-            font-family: Arial, Helvetica, sans-serif;
+            font-family: Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
             overflow: hidden;
             height: 100vh;
@@ -50,7 +50,7 @@
         }
         h3 {
             font-size: 3vh;
-            margin: 1vh 0 1vh 0;
+            margin: 2vh 0 2vh 0;
         }
         h4 {
             font-size: 2vh;
@@ -79,15 +79,16 @@
             z-index: 2;
         }
         #intro, #game-over, #won-game {
+            background: #69D2E7;
             visibility: hidden;
-            background: white;
+            /* background: white; */
             position: absolute;
-            top: 10vh;
-            left: 25vw;
-            width: 50vw;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
             height: 80vh;
             z-index: 3;
-            border-radius: 2vw;
+            border-radius: 4vw;
         }
         .flex {
             align-items: center;
@@ -100,11 +101,17 @@
             min-width: 100%;
         }
         #start-button {
-            min-width: 10vw;
+            min-width: 220px;
+            border: 0.1vh black solid;
+            font-size: 2vh;
+            background: #69D2E7;
+            border-radius: 2vh;
             height: 5vh;
+            cursor: pointer;
         }
         .info-canvas {
             height: 8vh;
+            min-width: 750px
         }
     </style>
     <body>
@@ -119,10 +126,10 @@
         <div id = 'blur'></div>
         <div id = 'intro'>
             <div class = 'flex'>
-                <h3>How to play:</h3>
-                <h4>Avoid fish that are larger than you to survive</h4>
+                <h3>Rules of the Pond</h3>
+                <h4>Use the arrow keys to avoid larger fish</h4>
                     <canvas class = 'info-canvas' id = 'intro-avoid'></canvas>
-                <h4>Eat fish that are smaller than you to grow in size</h4>
+                <h4>Eat smaller fish to grow in size</h4>
                     <canvas class = 'info-canvas' id = 'intro-eat'></canvas>
                 <h4>Beware of odd-sized fish</h4>
                     <canvas class = 'info-canvas' id = 'intro-odd'></canvas>
@@ -132,7 +139,7 @@
                     <canvas class = 'info-canvas' id = 'intro-bonus'></canvas>
                 <h4>Become the biggest fish in the pond to win</h4>
                     <canvas class = 'info-canvas' id = 'intro-win'></canvas>
-                <button id = 'start-button'>Ready!</button>
+                <button id = 'start-button'>Play!</button>
             </div>
         </div>
         <div id = 'game-over'></div>

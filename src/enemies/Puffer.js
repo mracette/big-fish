@@ -1,4 +1,4 @@
-import { lerp, equilateralTriangle, circle, ellipse, spikes } from '../utils/utils';
+import { lerp, newEquilateralTriangle, circle, ellipse, spikes } from '../utils/utils';
 import { nx, ny, colorPalette } from '../globals/globals'; 
 
 export function generatePufferParams() {
@@ -176,7 +176,7 @@ export class Puffer {
         );
 
         // back tail
-        equilateralTriangle(
+        newEquilateralTriangle(
             ctx, 
             this.size, 
             this.direction === 'left' ? - Math.PI / 2 : Math.PI / 2, 
@@ -189,7 +189,7 @@ export class Puffer {
         circle(ctx, this.x, this.y, this.size, colorPalette.pufferFish[0]);
 
         // middle fin
-        equilateralTriangle(
+        newEquilateralTriangle(
             ctx, 
             this.size / 2, 
             this.direction === 'left' ? - Math.PI / 2 : Math.PI / 2, 

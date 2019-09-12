@@ -5,25 +5,43 @@ export function rotatePoint(px, py, cx, cy, angle) {
     }
 }
 
-export function equilateralTriangle(ctx, side, rotation, x, y, fill, flapAmount) {
-
-    const v = [];
-    const h = side * Math.sqrt(3) / 2
-    const m = flapAmount || 1;
-
-    v.push(rotatePoint(x, y - 2 * h / 3, x, y, rotation));
-    v.push(rotatePoint(x + side / 2, y + m * (h / 3), x, y, rotation));
-    v.push(rotatePoint(x - side / 2, y + m * (h / 3), x, y, rotation));
+export function drawEquilateralTriangle(ctx, p, fill) {
 
     if(!!fill) {ctx.fillStyle = fill};
 
     ctx.beginPath();
-    ctx.moveTo(v[0].x, v[0].y);
-    ctx.lineTo(v[1].x, v[1].y);
-    ctx.lineTo(v[2].x, v[2].y);
-    ctx.lineTo(v[0].x, v[0].y);
+    ctx.moveTo(p[0].x, p[0].y);
+    ctx.lineTo(p[1].x, p[1].y);
+    ctx.lineTo(p[2].x, p[2].y);
+    ctx.lineTo(p[0].x, p[0].y);
     ctx.fill();
     ctx.closePath();
+
+}
+
+export function updateEquilateralTriangle(p, vx, vy, cx, cy, rotation, scaleAmount) {
+
+    const m = scaleAmount || 1;
+    const v = [];
+
+    v.push(rotatePoint(p[0].x + vx, p[0].y + vy, cx, cy, rotation));
+    v.push(rotatePoint(p[1].x + vx, p[1].y + vy, cx, cy, rotation));
+    v.push(rotatePoint(p[2].x + vx, p[2].y + vy, cx, cy, rotation));
+
+    return v;
+
+}
+
+export function newEquilateralTriangle(side, x, y, orientation) {
+
+    const v = [];
+    const h = side * Math.sqrt(3) / 2
+
+    v.push(rotatePoint(x, y - 2 * h / 3, x, y, orientation));
+    v.push(rotatePoint(x + side / 2, y + (h / 3), x, y, orientation));
+    v.push(rotatePoint(x - side / 2, y + (h / 3), x, y, orientation));
+
+    return v;
     
 }
 
@@ -53,7 +71,7 @@ export function spikes(ctx, n, size, x, y, r, fill) {
 
     for(let i = 0; i < n; i++) {
         const angle = 2 * Math.PI * (i / n);
-        equilateralTriangle(ctx, size, Math.PI / 2 + angle, x + Math.cos(angle) * r, y + Math.sin(angle) * r, fill);
+        newEquilateralTriangle(ctx, size, Math.PI / 2 + angle, x + Math.cos(angle) * r, y + Math.sin(angle) * r, fill);
     }
 
 }

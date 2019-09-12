@@ -21,8 +21,8 @@ function init() {
 
     drawBackground();
 
-    showIntroPanel();
-    // render(0);
+    //showIntroPanel();
+    render(0);
 
 }
 
@@ -200,8 +200,6 @@ function keyDownHandler(e) {
             break;
     }
 
-    console.log(pl.leftPressed);
-
 }
 
 function keyUpHandler(e) {
@@ -225,6 +223,9 @@ function keyUpHandler(e) {
 }
 
 function showIntroPanel() {
+
+    document.getElementById('blur').style.visibility = 'visible';
+
     Array.from(document.getElementsByClassName('info-canvas')).forEach(el => {
 
         el.height = el.clientHeight;
@@ -252,30 +253,30 @@ function showIntroPanel() {
                 break;
             }
             case 'intro-odd': {
-                const s = new Jumper(el.clientHeight / 3, 1, 1, el.clientWidth * 3.75/10, el.clientHeight / 2, 'right', '#87a8eb');
+                const s = new Jumper(el.clientHeight / 3, 1, 1, el.clientWidth * 5/10 - el.clientHeight * 1.2, el.clientHeight / 2, 'right', '#87a8eb');
                 s.reposition(0);
                 s.draw(el.getContext('2d'));
 
-                const p = new Player(el.clientWidth * 4.5/10, el.clientHeight / 2, el.clientHeight / 4, Math.PI / 2);
+                const p = new Player(el.clientWidth * 5/10 - el.clientHeight / 3, el.clientHeight / 2, el.clientHeight / 4, Math.PI / 2);
                 p.reposition();
                 p.draw(el.getContext('2d'));
 
-                const ss = new Jumper(el.clientHeight / 5, 1, 1, el.clientWidth * 5.5/10, el.clientHeight / 2, 'right', '#87a8eb');
+                const ss = new Jumper(el.clientHeight / 5, 1, 1, el.clientWidth * 5/10 + el.clientHeight / 2, el.clientHeight / 2, 'right', '#87a8eb');
                 ss.reposition(0);
                 ss.draw(el.getContext('2d'));
 
-                const pp = new Player(el.clientWidth * 6/10, el.clientHeight / 2, el.clientHeight / 4, 3 * Math.PI / 2);
+                const pp = new Player(el.clientWidth * 5/10 + el.clientHeight, el.clientHeight / 2, el.clientHeight / 4, 3 * Math.PI / 2);
                 pp.reposition();
                 pp.draw(el.getContext('2d'));
 
                 break;
             }
             case 'intro-tails': {
-                const s = new Simple(el.clientHeight / 2.3, 1, 1, el.clientWidth * 4.5/10, el.clientHeight / 2, 'left', '#addd8e');
+                const s = new Simple(el.clientHeight / 2.3, 1, 1, el.clientWidth * 5/10 - el.clientHeight / 2, el.clientHeight / 2, 'left', '#addd8e');
                 s.reposition(0);
                 s.draw(el.getContext('2d'));
 
-                const p = new Player(el.clientWidth * 5.5/10, el.clientHeight / 2, el.clientHeight / 4, Math.PI / 2);
+                const p = new Player(el.clientWidth * 5/10 + el.clientHeight / 2, el.clientHeight / 2, el.clientHeight / 4, Math.PI / 2);
                 p.reposition();
                 p.draw(el.getContext('2d'));
                 break;
@@ -291,7 +292,9 @@ function showIntroPanel() {
             }
         }
     });
+
     document.getElementById('intro').style.visibility = 'visible';
+
 }
 
 function startGame() {
