@@ -5,6 +5,36 @@ export function rotatePoint(px, py, cx, cy, angle) {
     }
 }
 
+export function star(ctx, x, y, scale, fill, rotation) {
+
+    const tp = Math.PI * 2;
+
+    const v = [];
+
+    v.push(rotatePoint(x + Math.cos(tp*5/5)*scale, y + Math.sin(tp*5/5)*scale, x, y, rotation));
+    v.push(rotatePoint(x + Math.cos(tp*3/5)*scale, y + Math.sin(tp*3/5)*scale, x, y, rotation));
+    v.push(rotatePoint(x + Math.cos(tp*1/5)*scale, y + Math.sin(tp*1/5)*scale, x, y, rotation));
+    v.push(rotatePoint(x + Math.cos(tp*4/5)*scale, y + Math.sin(tp*4/5)*scale, x, y, rotation));
+    v.push(rotatePoint(x + Math.cos(tp*2/5)*scale, y + Math.sin(tp*2/5)*scale, x, y, rotation));
+    v.push(rotatePoint(x + Math.cos(tp*0/5)*scale, y + Math.sin(tp*0/5)*scale, x, y, rotation));
+
+    ctx.fillStyle = fill;
+    ctx.beginPath();
+
+    v.map((point, i) => {
+        if(i === 0) {
+            ctx.moveTo(point.x, point.y);
+        } else {
+            ctx.lineTo(point.x, point.y);
+        }
+    })
+
+
+    ctx.closePath();
+    ctx.fill();
+
+}
+
 export function equilateralTriangle(ctx, side, rotation, x, y, fill, flapAmount) {
 
     const v = [];
@@ -27,14 +57,20 @@ export function equilateralTriangle(ctx, side, rotation, x, y, fill, flapAmount)
     
 }
 
-export function circle(ctx, x, y, r, fill) {
+export function circle(ctx, x, y, r, fill, stroke, strokeStyle, rotStart, rotEnd) {
 
-    if(!!fill) {ctx.fillStyle = fill};
+    ctx.fillStyle = fill;
+    ctx.strokeStyle = strokeStyle;
+
+    const r0 = rotStart || 0;
+    const r1 = rotEnd || Math.PI * 2
 
     ctx.beginPath();
-    ctx.arc(x, y, r, 0, Math.PI*2);
-    ctx.fill();
+    ctx.arc(x, y, r, r0, r1);
+    if(fill !== null) {ctx.fill();}
     ctx.closePath();
+
+    if(!!stroke && !!strokeStyle) {ctx.stroke();}
 
 }
 
@@ -71,6 +107,8 @@ export function lerpColorRgb(a, b, l) {
 }
 
 export function lerpColorHex(amount, colorArray) {
+
+    console.log(amount);
 
     const bucket = Math.ceil(amount * (colorArray.length - 1));
 

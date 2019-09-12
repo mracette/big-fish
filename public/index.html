@@ -7,7 +7,7 @@
     </head>
     <style>
         body{
-            font-family: Arial, Helvetica, sans-serif;
+            font-family: Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
             overflow: hidden;
             height: 100vh;
@@ -26,12 +26,18 @@
             z-index: -1;
         }
         #canvas {
+            visibility: hidden;
             width: 80vw;
             height: 40vw;
             z-index: 1;
             border-radius: 2vw;
+            border: 2px black solid;
+        }
+        #title {
+            visibility: hidden;
         }
         #stats {
+            visibility: hidden;
             margin-bottom: 0;
             display: flex;
             flex-direction: row;
@@ -50,7 +56,7 @@
         }
         h3 {
             font-size: 3vh;
-            margin: 1vh 0 1vh 0;
+            margin: 2vh 0 2vh 0;
         }
         h4 {
             font-size: 2vh;
@@ -79,15 +85,17 @@
             z-index: 2;
         }
         #intro, #game-over, #won-game {
+            background: #ffffff;
             visibility: hidden;
-            background: white;
+            /* background: white; */
             position: absolute;
-            top: 10vh;
-            left: 25vw;
-            width: 50vw;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
             height: 80vh;
             z-index: 3;
-            border-radius: 2vw;
+            border-radius: 4vw;
+            border: 2px solid black;
         }
         .flex {
             align-items: center;
@@ -100,15 +108,20 @@
             min-width: 100%;
         }
         #start-button {
-            min-width: 10vw;
+            min-width: 220px;
+            border: 0.1vh black solid;
+            font-size: 2vh;
+            background: white;
             height: 5vh;
+            cursor: pointer;
         }
         .info-canvas {
             height: 8vh;
+            min-width: 750px
         }
     </style>
     <body>
-        <h1>Big Fish</h1>
+        <h1 id='title'>Big Fish</h1>
         <div id = 'stats'>
             <h2>FISH EATEN <div id='count'>0</div></h2>
             <h2>SCORE <div id='score'>0</div></h2>
@@ -119,20 +132,20 @@
         <div id = 'blur'></div>
         <div id = 'intro'>
             <div class = 'flex'>
-                <h3>How to play:</h3>
-                <h4>Avoid fish that are larger than you to survive</h4>
+                <h3>Rules of the Pond</h3>
+                <h4>1. Use the arrow keys to avoid larger fish</h4>
                     <canvas class = 'info-canvas' id = 'intro-avoid'></canvas>
-                <h4>Eat fish that are smaller than you to grow in size</h4>
+                <h4>2. Eat smaller fish to grow in size</h4>
                     <canvas class = 'info-canvas' id = 'intro-eat'></canvas>
-                <h4>Beware of odd-sized fish</h4>
+                <h4>3. Beware of odd-sized fish</h4>
                     <canvas class = 'info-canvas' id = 'intro-odd'></canvas>
-                <h4>Tails do not count towards collisions</h4>
+                <h4>4. Tails do not count towards collisions</h4>
                     <canvas class = 'info-canvas' id = 'intro-tails'></canvas>
-                <h4>Collect bonus items to gain points and power-ups</h4>
+                <h4>5. Collect bonus items to gain points and power-ups</h4>
                     <canvas class = 'info-canvas' id = 'intro-bonus'></canvas>
-                <h4>Become the biggest fish in the pond to win</h4>
+                <h4>6. Become the biggest fish in the pond to win</h4>
                     <canvas class = 'info-canvas' id = 'intro-win'></canvas>
-                <button id = 'start-button'>Ready!</button>
+                <button id = 'start-button'>Play!</button>
             </div>
         </div>
         <div id = 'game-over'></div>

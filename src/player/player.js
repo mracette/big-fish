@@ -1,5 +1,5 @@
-import { ny, nx, height, width, colorPalette } from '../globals/globals';
-import { lerp, rotatePoint } from '../utils/utils';
+import { ny, nx, width, colorPalette } from '../globals/globals';
+import { lerp, lerpColorHex, rgbToHex, rotatePoint, circle } from '../utils/utils';
 
 export default class Player {
 
@@ -7,8 +7,8 @@ export default class Player {
 
         this.x = x || nx(50);
         this.y = y || ny(50);
-        this.radius = radius || ny(1.5);
-        this.diameter = this.radius * 2;
+        this.size = radius || ny(1.5);
+        this.diameter = this.size * 2;
         this.vx = 0;
         this.vy = 0;
         this.theta = theta || 0;
@@ -20,26 +20,30 @@ export default class Player {
         this.upPressed = false;
         this.downPressed = false;
 
+        this.bubble = false;
+        this.bubblePoppedTime = 0
+        this.bubblePopped = false;
+
     }
 
-    draw(ctx) {
+    draw(ctx, time) {
 
         // draw circle
         ctx.fillStyle = colorPalette.goldFishTwo;
         ctx.beginPath();
-        ctx.arc(this.x, this.y, this.radius, 0, Math.PI*2);
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI*2);
         ctx.fill();
         ctx.closePath();
     
         // draw tail
-        const side = this.radius * 1.5;
+        const side = this.size * 1.5;
         const h = side * Math.sqrt(3) / 2;
     
         const points = [
-            [this.x, this.y + this.radius / 2],
-            [this.x - side / 2, this.y + h + this.radius / 2],
-            [this.x + side / 2, this.y + h + this.radius / 2],
-            [this.x, this.y + this.radius / 2]
+            [this.x, this.y + this.size / 2],
+            [this.x - side / 2, this.y + h + this.size / 2],
+            [this.x + side / 2, this.y + h + this.size / 2],
+            [this.x, this.y + this.size / 2]
         ];
     
         ctx.beginPath();
@@ -53,9 +57,27 @@ export default class Player {
             }
         });
     
-        ctx.fill(); 
         ctx.closePath();
-        ctx.save();
+        ctx.fill(); 
+
+        if(this.bubble) {
+
+            if(this.bubblePopped) {
+                const color = rgbToHex(lerpColorHex(0.5 + 0.5 * Math.sin(time / 50), ['#FFFFFF', colorPalette.blueTwo]));
+                console.log(color);
+                ctx.lineWidth = 2;
+                circle(ctx, this.x, this.y, this.size * 1.15, null, true, color);
+                circle(ctx, this.x, this.y, this.size * 1.1, null, true, color, 0, Math.PI / 8);
+                if(time > this.bubblePoppedTime + 2500) {
+                    this.bubble = false;
+                    this.bubblePopped = false;
+                }
+            } else {
+                circle(ctx, this.x, this.y, this.size * 1.15, null, true, '#FFFFFF');
+                circle(ctx, this.x, this.y, this.size * 1.1, null, true, '#FFFFFF', 0, Math.PI / 8);                
+            }
+
+        }
             
     }
 
@@ -105,23 +127,26 @@ export default class Player {
         this.y += this.vy;
     
         // flip to other side of screen if necessary
-        if(this.x >= width + this.radius) {
-            this.x = -this.radius;
-        } else if(this.x <= -this.radius) {
-            this.x = width + this.radius;
+        if(this.x >= width + this.size) {
+            this.x = -this.size;
+        } else if(this.x <= -this.size) {
+            this.x = width + this.size;
         }
     
-        if(this.y >= height + this.radius) {
-            this.y = -this.radius;
-        } else if(this.y <= -this.radius) {
-            this.y = height + this.radius;
+        // flip momentum for bounce effect on bottom and top of screen
+        if(this.y >= ny(100) - this.size) {
+            this.y = ny(100) - this.size;
+            this.vy = -0.33 * this.vy;
+        } else if(this.y <= ny(0) + this.size) {
+            this.y = ny(0) + this.size;
+            this.vy = -0.33 * this.vy;
         }
     
     }
 
-    render(ctx) {
+    render(ctx, time) {
         this.reposition();
-        this.draw(ctx);
+        this.draw(ctx, time);
     }
 
 }

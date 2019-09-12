@@ -1,8 +1,11 @@
-import { nx, ny, pl, en, enpr, se, canvas, ctx, height, width, colorPalette } from './globals/globals';
+import { nx, ny, pl, pr, bo, en, enpr, se, canvas, ctx, height, width, colorPalette } from './globals/globals';
 import Player from './player/Player';
 import { Jumper, generateJumperParams } from './enemies/Jumper';
 import { Simple, generateSimpleParams } from './enemies/Simple';
 import { Puffer, generatePufferParams } from './enemies/Puffer';
+import { BonusItem } from './extras/BonusItem';
+import { Bubble } from './extras/Bubble';
+import { Seaweed } from './extras/Seaweed';
 
 import Stats from 'stats.js';
 const stats = new Stats();
@@ -17,12 +20,13 @@ function init() {
     stats.showPanel(0);
     document.body.append( stats.dom );
 
+    pr.push(new Seaweed(nx(50), ny(100), ny(10)));
+
     addListeners();
 
     drawBackground();
 
-    showIntroPanel();
-    // render(0);
+    showIntroPanel(false);
 
 }
 
@@ -38,7 +42,7 @@ function render(time) {
     ctx.fillRect(0, 0, width, height);
 
     // player movement
-    pl.render(ctx);
+    pl.render(ctx, time);
 
     // add an enemy if needed
     if(en.length < se.enemyCount && Math.random() > .6) {
@@ -66,7 +70,7 @@ function render(time) {
     // enemy movement
     en.map((enemy, i) => {
 
-        enemy.render(ctx, time, pl.x, pl.y, pl.radius);
+        enemy.render(ctx, time, pl.x, pl.y, pl.size);
 
         if(enemy.collision) {
 
@@ -76,8 +80,8 @@ function render(time) {
                 enemyRemovalArray.push(i);
 
                 // update player stats
-                pl.radius += enemy.diameter / 20;
-                pl.diameter = pl.radius * 2;
+                pl.size += enemy.diameter / 20;
+                pl.diameter = pl.size * 2;
 
                 // update session stats
                 se.fishEaten ++;
@@ -85,9 +89,24 @@ function render(time) {
                 se.progress = pl.diameter / ny(100);
                 updateStats();
 
+                // introduce more puffers at 5 fish eaten
+                if(se.fishEaten === 5) {
+                    enpr.push('puffer');
+                }
+
+                // puffers more likely at 15 fish eaten
+                if(se.fishEaten === 15) {
+                    enpr.push('puffer');
+                }
+
             } else {
-                se.active = false;
-                console.log('owwww');
+
+                if(pl.bubble) {
+                    pl.bubblePopped = true;
+                    pl.bubblePoppedTime = time;
+                } else if(!pl.bubblePopped) {
+                    se.active = false;
+                }
             }
         }
         if(enemy.dispose === true) {
@@ -98,6 +117,45 @@ function render(time) {
     for(let i = 0; i < enemyRemovalArray.length; i++) {
         en.splice(enemyRemovalArray[i], 1);
     }
+
+    // create new bonuses every so often
+    if(Math.random() < 0.0001) {
+        bo.push(new BonusItem());
+    }
+    if(Math.random() < 0.0001) {
+        bo.push(new Bubble());
+    }
+
+    const bonusRemovalArray = []
+
+    // bonus item movement
+    bo.map((bonus, i) => {
+        bonus.render(ctx, time, pl.x, pl.y, pl.size);
+        if(bonus.collision) {
+
+            bonusRemovalArray.push(i);
+            se.score += 500;
+            updateStats();
+
+            if(bonus.type === 'bubble') {
+                pl.bubble = true;
+            }
+
+        }
+
+        if(bonus.dispose) {
+            bonusRemovalArray.push(i);
+        }
+
+    })
+
+    for(let i = 0; i < bonusRemovalArray.length; i++) {
+        bo.splice(bonusRemovalArray[i], 1);
+    }
+
+    pr.map((prop) => {
+        prop.render(ctx, time);
+    });
     
     stats.end();
     
@@ -115,49 +173,24 @@ function updateStats() {
 
 function drawBackground() {
 
-    let tileWidth = nx(2);
+    let tileWidth = nx(1);
 
     const p = document.createElement('canvas');
     p.width = tileWidth;
     p.height = tileWidth;
-
-    
+ 
     const pctx = p.getContext('2d');
+    pctx.lineWidth = nx(.05);
 
-    // pctx.fillStyle = '#222222';
-    // pctx.fillRect(0,0,tileWidth,tileWidth);
+    pctx.fillStyle = colorPalette.pufferFishTail;
+    pctx.fillRect(0, 0, tileWidth, tileWidth);
 
+    pctx.strokeStyle = '#ffffff';
 
-    pctx.strokeStyle = colorPalette.blueOne;
-    pctx.fillStyle = colorPalette.pufferFish;
-    pctx.beginPath();
-    pctx.moveTo(0, tileWidth);
+    pctx.moveTo(0,0);
+    pctx.lineTo(tileWidth / 2, tileWidth / 2);
     pctx.lineTo(tileWidth, 0);
     pctx.stroke();
-    pctx.closePath();
-
-
-    // pctx.arc(0, tileWidth/2, tileWidth/4, 0, Math.PI * 2);
-    // pctx.fill();
-    // pctx.closePath();
-    // pctx.arc(tileWidth, tileWidth/2, tileWidth/4, 0, Math.PI * 2);
-    // pctx.fill();
-    // pctx.closePath();
-
-    pctx.strokeStyle = colorPalette.goldFishTwo;
-    pctx.fillStyle = colorPalette.pufferFish;
-    pctx.beginPath();
-    pctx.moveTo(0, 0);
-    pctx.lineTo(tileWidth, tileWidth);
-    pctx.stroke();
-    pctx.closePath();
-
-    // pctx.arc(tileWidth / 2, 0, tileWidth/4, 0, Math.PI * 2);
-    // pctx.fill();
-    // pctx.closePath();
-    // pctx.arc(tileWidth / 2, tileWidth, tileWidth/4, 0, Math.PI * 2);
-    // pctx.fill();
-    // pctx.closePath();
 
     const b = document.getElementById('canvas-background');
     const bctx = b.getContext('2d');
@@ -167,6 +200,11 @@ function drawBackground() {
     bctx.fillStyle = bctx.createPattern(p, "repeat");
     bctx.rect(0, 0, b.width, b.height);
     bctx.fill();
+
+    // add seaweed
+    for(let i = 0; i < 48; i++) {
+        pr.push(new Seaweed(Math.random() * nx(100), ny(100), ny(8) + Math.random() * ny(5)));
+    }
 
 }
 
@@ -200,8 +238,6 @@ function keyDownHandler(e) {
             break;
     }
 
-    console.log(pl.leftPressed);
-
 }
 
 function keyUpHandler(e) {
@@ -224,7 +260,14 @@ function keyUpHandler(e) {
 
 }
 
-function showIntroPanel() {
+function showIntroPanel(flagShow) {
+
+    if(!flagShow) {startGame();}
+    
+    if(flagShow) {
+
+    document.getElementById('blur').style.visibility = 'visible';
+
     Array.from(document.getElementsByClassName('info-canvas')).forEach(el => {
 
         el.height = el.clientHeight;
@@ -252,30 +295,30 @@ function showIntroPanel() {
                 break;
             }
             case 'intro-odd': {
-                const s = new Jumper(el.clientHeight / 3, 1, 1, el.clientWidth * 3.75/10, el.clientHeight / 2, 'right', '#87a8eb');
+                const s = new Jumper(el.clientHeight / 3, 1, 1, el.clientWidth * 5/10 - el.clientHeight * 1.2, el.clientHeight / 2, 'right', '#87a8eb');
                 s.reposition(0);
                 s.draw(el.getContext('2d'));
 
-                const p = new Player(el.clientWidth * 4.5/10, el.clientHeight / 2, el.clientHeight / 4, Math.PI / 2);
+                const p = new Player(el.clientWidth * 5/10 - el.clientHeight / 3, el.clientHeight / 2, el.clientHeight / 4, Math.PI / 2);
                 p.reposition();
                 p.draw(el.getContext('2d'));
 
-                const ss = new Jumper(el.clientHeight / 5, 1, 1, el.clientWidth * 5.5/10, el.clientHeight / 2, 'right', '#87a8eb');
+                const ss = new Jumper(el.clientHeight / 5, 1, 1, el.clientWidth * 5/10 + el.clientHeight / 2, el.clientHeight / 2, 'right', '#87a8eb');
                 ss.reposition(0);
                 ss.draw(el.getContext('2d'));
 
-                const pp = new Player(el.clientWidth * 6/10, el.clientHeight / 2, el.clientHeight / 4, 3 * Math.PI / 2);
+                const pp = new Player(el.clientWidth * 5/10 + el.clientHeight, el.clientHeight / 2, el.clientHeight / 4, 3 * Math.PI / 2);
                 pp.reposition();
                 pp.draw(el.getContext('2d'));
 
                 break;
             }
             case 'intro-tails': {
-                const s = new Simple(el.clientHeight / 2.3, 1, 1, el.clientWidth * 4.5/10, el.clientHeight / 2, 'left', '#addd8e');
+                const s = new Simple(el.clientHeight / 2.3, 1, 1, el.clientWidth * 5/10 - el.clientHeight / 2, el.clientHeight / 2, 'left', '#addd8e');
                 s.reposition(0);
                 s.draw(el.getContext('2d'));
 
-                const p = new Player(el.clientWidth * 5.5/10, el.clientHeight / 2, el.clientHeight / 4, Math.PI / 2);
+                const p = new Player(el.clientWidth * 5/10 + el.clientHeight / 2, el.clientHeight / 2, el.clientHeight / 4, Math.PI / 2);
                 p.reposition();
                 p.draw(el.getContext('2d'));
                 break;
@@ -291,12 +334,20 @@ function showIntroPanel() {
             }
         }
     });
+    
     document.getElementById('intro').style.visibility = 'visible';
+
+    }
+
+
 }
 
 function startGame() {
     document.getElementById('intro').style.visibility = 'hidden';
     document.getElementById('blur').style.visibility = 'hidden';
+    document.getElementById('title').style.visibility = 'visible';
+    document.getElementById('canvas').style.visibility = 'visible';
+    document.getElementById('stats').style.visibility = 'visible';
     render(0);
 }
 

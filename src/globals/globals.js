@@ -42,11 +42,17 @@ export const colorPalette = {
 // enemy probability table
 export const enpr = []
 enpr.push(...new Array(1).fill('puffer'));
-enpr.push(...new Array(4).fill('jumper'));
-enpr.push(...new Array(12).fill('simple'));
+enpr.push(...new Array(6).fill('jumper'));
+enpr.push(...new Array(16).fill('simple'));
 
 // enemy array
 export let en = [];
+
+// bonus item array
+export let bo = [];
+
+// props array
+export let pr = [];
 
 // session state
 export const se = {

@@ -1,4 +1,4 @@
-import { lerpColorHex, rotatePoint, hexToRgb, rgbToHex, cividis } from '../utils/utils';
+import { lerpColorHex, rotatePoint, hexToRgb, rgbToHex, lerpColorRgb, cividis, circle } from '../utils/utils';
 import { nx, ny, colorPalette } from '../globals/globals'; 
 
 export function generateSimpleParams() {
@@ -39,17 +39,19 @@ export class Simple {
         this.vertices = 4;
         this.tailSide = this.size * 1.3;
         this.tailHeight = this.tailSide * Math.sqrt(3) / 2;
-
+        
         this.coords = [
             [0, this.tailSide / 2],
             [-this.tailSide / 2, this.tailHeight + this.size / 2],
             [this.tailSide / 2, this.tailHeight + this.size / 2],
             [0, this.tailSide / 2]
         ];
-
+        
         this.currentCoords;
         this.collision;
         this.dispose = false;
+        this.sideEye = false;
+        this.eyeAngle = 0;
 
     }
 
@@ -88,12 +90,7 @@ export class Simple {
 
     }
 
-    collisionDetection(x, y, radius) {
-
-        const xx = (this.x - x) * (this.x - x)
-        const yy = (this.y - y) * (this.y - y)
-        const dd = xx + yy;
-        const rr = (this.size + radius) * (this.size + radius);
+    collisionDetection(dd, rr) {
 
         if(dd < rr) {this.collision = true;} else {
             this.collision = false;
@@ -102,6 +99,9 @@ export class Simple {
     }
 
     draw(ctx) {
+
+        const darkenedStroke = rgbToHex(lerpColorRgb(hexToRgb(this.color), [0,0,0], 0.15));
+
         // draw circle
         ctx.fillStyle = this.color;
         ctx.beginPath();
@@ -121,6 +121,52 @@ export class Simple {
 
         ctx.fill(); 
         ctx.closePath();
+
+        // outter eye
+        circle(
+            ctx, 
+            this.direction === 'left' ? this.x - this.size * 0.55 : this.x + this.size * 0.55,
+            this.y - this.size / 6,
+            this.size / 8,
+            '#ffffff'
+        );
+
+        const innerY = this.direction === 'left' ? 
+            (this.y - this.size / 6 - (this.sideEye ? Math.sin(this.eyeAngle + Math.PI) * this.size / 12 : 0)) : 
+            (this.y - this.size / 6 - (this.sideEye ? Math.sin(this.eyeAngle - Math.PI) * this.size / 12 : 0));
+
+        const innerX = this.direction === 'left' ? 
+            (this.x - this.size * 0.55 - (this.sideEye ? Math.cos(this.eyeAngle + Math.PI) * this.size / 12 : 0)) : 
+            (this.x + this.size * 0.55 - (this.sideEye ? Math.cos(this.eyeAngle - Math.PI) * this.size / 12 : 0))
+
+        // inner eye
+        circle(
+            ctx, 
+            innerX,
+            innerY,
+            this.size / 16,
+            this.color
+        );
+
+        const mouthStart = [
+            this.direction === 'left' ? this.x - Math.cos( 1.9 * Math.PI ) * this.size * 0.99 : this.x + Math.cos( 1.9 * Math.PI ) * this.size * 0.99,
+            this.direction === 'left' ? this.y - Math.sin( 1.9 * Math.PI ) * this.size * 0.99 : this.y - Math.sin( 1.9 * Math.PI ) * this.size * 0.99
+        ]
+
+        ctx.strokeStyle = darkenedStroke;
+
+        ctx.lineWidth = this.size / 24;
+        ctx.beginPath();
+        ctx.moveTo(
+            mouthStart[0],
+            mouthStart[1]
+        )
+        ctx.lineTo(
+            this.direction === 'left' ? mouthStart[0] + this.size / 4 : mouthStart[0] - this.size / 4,
+            mouthStart[1]
+        )
+        ctx.closePath();
+        ctx.stroke();
     }
 
     render(ctx, time, px, py, radius) {
@@ -129,8 +175,20 @@ export class Simple {
 
         if(this.x + this.size < nx(0) || this.x - this.size > nx(100)){this.dispose = true;}
 
-        if(Math.abs(this.x - px) < radius * 4 || Math.abs(this.y - py) < radius * 4) {
-            this.collisionDetection(px, py, radius);
+        const xx = (this.x - px) * (this.x - px)
+        const yy = (this.y - py) * (this.y - py)
+        const dd = xx + yy;
+        const rr = (this.size + radius) * (this.size + radius);
+
+        if(dd < 2 * rr) {
+            this.collisionDetection(dd, rr);
+        }
+
+        if(dd < 24 * rr) {
+            this.sideEye = true;
+            this.eyeAngle = Math.atan2(py - this.y, px - this.x);
+        } else {
+            this.sideEye = false;
         }
 
         this.draw(ctx);
