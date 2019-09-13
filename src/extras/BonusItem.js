@@ -14,6 +14,7 @@ export class BonusItem {
         this.color = '#FFD700';
         this.rotation = 0;
         this.size = ny(2);
+        this.dispose = false;
 
     }
 
