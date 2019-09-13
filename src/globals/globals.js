@@ -1,4 +1,3 @@
-
 // canvas and context
 export const canvas = document.getElementById('canvas');
 export const ctx = canvas.getContext('2d');
@@ -55,7 +54,7 @@ export let bo = [];
 export let pr = [];
 
 // session state
-export const se = {
+export let se = {
     active: true,
     fishEaten: 0,
     score: 0,

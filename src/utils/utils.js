@@ -108,8 +108,6 @@ export function lerpColorRgb(a, b, l) {
 
 export function lerpColorHex(amount, colorArray) {
 
-    console.log(amount);
-
     const bucket = Math.ceil(amount * (colorArray.length - 1));
 
     const bucketStart = (bucket - 1) / (colorArray.length - 1);

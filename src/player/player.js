@@ -64,7 +64,6 @@ export default class Player {
 
             if(this.bubblePopped) {
                 const color = rgbToHex(lerpColorHex(0.5 + 0.5 * Math.sin(time / 50), ['#FFFFFF', colorPalette.blueTwo]));
-                console.log(color);
                 ctx.lineWidth = 2;
                 circle(ctx, this.x, this.y, this.size * 1.15, null, true, color);
                 circle(ctx, this.x, this.y, this.size * 1.1, null, true, color, 0, Math.PI / 8);

@@ -7,8 +7,6 @@ import { BonusItem } from './extras/BonusItem';
 import { Bubble } from './extras/Bubble';
 import { Seaweed } from './extras/Seaweed';
 
-import Stats from 'stats.js';
-const stats = new Stats();
 
 init();
 
@@ -17,22 +15,17 @@ function init() {
     canvas.height = height;
     canvas.width = width;
 
-    stats.showPanel(0);
-    document.body.append( stats.dom );
-
     pr.push(new Seaweed(nx(50), ny(100), ny(10)));
 
     addListeners();
 
     drawBackground();
 
-    showIntroPanel(false);
+    showIntroPanel(true);
 
 }
 
 function render(time) {
-
-    stats.begin();
 
     // clear last render
     ctx.clearRect(0, 0, width, height);
@@ -87,6 +80,10 @@ function render(time) {
                 se.fishEaten ++;
                 se.score += 1000 * enemy.diameter / ny(100);
                 se.progress = pl.diameter / ny(100);
+                if(se.progress >= 1) {
+                    se.active = false;
+                    wonGame();
+                }
                 updateStats();
 
                 // introduce more puffers at 5 fish eaten
@@ -106,6 +103,7 @@ function render(time) {
                     pl.bubblePoppedTime = time;
                 } else if(!pl.bubblePopped) {
                     se.active = false;
+                    gameOver();
                 }
             }
         }
@@ -157,8 +155,6 @@ function render(time) {
         prop.render(ctx, time);
     });
     
-    stats.end();
-    
     if(se.active) {
         requestAnimationFrame(render);
     }
@@ -209,7 +205,11 @@ function drawBackground() {
 }
 
 function addListeners() {
-    document.getElementById('start-button').onclick = startGame;
+    document.getElementById('start-button').onclick = () => {startGame()};
+    document.getElementById('restart-button').onclick = () => {resetGame()};
+    document.getElementById('back-button').onclick = () => {resetGame()};
+    document.getElementById('info').onclick = () => {showInfo()};
+    document.getElementById('hide-info').onclick = () => {hideInfo()};
     document.addEventListener("keydown", keyDownHandler, false);
     document.addEventListener("keyup", keyUpHandler, false);
     document.addEventListener('resize', () => {
@@ -324,6 +324,17 @@ function showIntroPanel(flagShow) {
                 break;
             }
             case 'intro-bonus': {
+                const s = new BonusItem()
+                s.x = el.clientWidth / 2 - el.clientHeight / 2;
+                s.y = el.clientHeight / 2;
+                s.draw(el.getContext('2d'));
+
+                const b = new Bubble();
+                b.color = '#666666';
+                b.size = el.clientHeight / 4;
+                b.x = el.clientWidth / 2 + el.clientHeight / 2;
+                b.y = el.clientHeight / 2;
+                b.draw(el.getContext('2d'));
                 break;
             }
             case 'intro-win': {
@@ -345,37 +356,99 @@ function showIntroPanel(flagShow) {
 function startGame() {
     document.getElementById('intro').style.visibility = 'hidden';
     document.getElementById('blur').style.visibility = 'hidden';
+    document.getElementById('blur').style.opacity = 0;
     document.getElementById('title').style.visibility = 'visible';
     document.getElementById('canvas').style.visibility = 'visible';
     document.getElementById('stats').style.visibility = 'visible';
     render(0);
 }
 
+function wonGame() {
+
+    document.getElementById('blur').style.visibility = 'visible';
+    document.getElementById('blur').style.opacity = 0.8;
+
+    window.setTimeout(() => {
+
+        document.getElementById('canvas').style.visibility = 'hidden';
+        document.getElementById('title').style.visibility = 'hidden';
+        document.getElementById('stats').style.visibility = 'hidden';
+        document.getElementById('won-game').style.visibility = 'visible';
+
+    }, 1000)
+}
+
+function gameOver() {
+
+    window.setTimeout(() => {
+        document.getElementById('blur').style.visibility = 'visible';
+        document.getElementById('blur').style.opacity = 0.8;
+    }, 350);
+
+    window.setTimeout(() => {
+
+        document.getElementById('canvas').style.visibility = 'hidden';
+        document.getElementById('title').style.visibility = 'hidden';
+        document.getElementById('stats').style.visibility = 'hidden';
+        document.getElementById('game-over').style.visibility = 'visible';
+
+    }, 1000)
+    
+}
+
+function showInfo() {
+    se.active = false;
+    document.getElementById('blur').style.opacity = 0.8;
+    document.getElementById('canvas').style.visibility = 'hidden';
+    document.getElementById('title').style.visibility = 'hidden';
+    document.getElementById('stats').style.visibility = 'hidden';
+    document.getElementById('info-panel').style.visibility = 'visible';
+}
+
+function hideInfo() {
+    document.getElementById('blur').style.opacity = 0;
+    document.getElementById('canvas').style.visibility = 'visible';
+    document.getElementById('title').style.visibility = 'visible';
+    document.getElementById('stats').style.visibility = 'visible';
+    document.getElementById('info-panel').style.visibility = 'hidden';
+    se.active = true;
+    render(0);
+}
+
 function resetGame() {
 
-    se = {
-        active: true,
-        fishEaten: 0,
-        score: 0,
-        progress: 0,
-        elapsed: 0,
-        enemyCount: 25,
-        stage: 1
-    }
+    se.active = true;
+    se.fishEaten = 0;
+    se.score = 0;
+    se.progress = 0;
+    se.elapsed = 0;
+    se.enemyCount = 25;
+    se.stage = 1;
 
-    pl = {
-        x: nx(50),
-        y: ny(50),
-        radius: ny(1.5),
-        diameter: ny(1.5) * 2,
-        vx: 0,
-        vy: 0,
-        theta: 0,
-        speedDelta: ny(0.0135),
-        thetaDelta: ny(0.0145)
-    }
+    pl.x = nx(50);
+    pl.y = ny(50);
+    pl.size = ny(1.5);
+    pl.diameter = ny(1.5) * 2;
+    pl.vx = 0;
+    pl.vy = 0;
+    pl.theta = 0;
+    pl.speedDelta = ny(0.0135);
+    pl.thetaDelta = ny(0.0145);
 
-    en = []
+    en.splice(0,en.length);
+    pr.splice(0,pr.length);
+    pr.push(new Seaweed(nx(50), ny(100), ny(10)));
+    bo.splice(0,bo.length);
+
+    document.getElementById('game-over').style.visibility = 'hidden';
+    document.getElementById('won-game').style.visibility = 'hidden';
+    document.getElementById('blur').style.opacity = 0;
+    document.getElementById('blur').style.visibility = 'hidden';
+    document.getElementById('title').style.visibility = 'visible';
+    document.getElementById('canvas').style.visibility = 'visible';
+    document.getElementById('stats').style.visibility = 'visible';
+
+    updateStats();
 
     render(0);
 

@@ -30,8 +30,6 @@
             width: 80vw;
             height: 40vw;
             z-index: 1;
-            border-radius: 2vw;
-            border: 2px black solid;
         }
         #title {
             visibility: hidden;
@@ -74,6 +72,7 @@
             background-color: green;
         }
         #blur {
+            transition: opacity 1000ms;;
             visibility: hidden;
             width: 100vw;
             height: 100vh;
@@ -84,15 +83,15 @@
             opacity: .8;
             z-index: 2;
         }
-        #intro, #game-over, #won-game {
+        #intro, #game-over, #won-game, #info-panel {
             background: #ffffff;
             visibility: hidden;
-            /* background: white; */
             position: absolute;
+            min-width: 750px;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            height: 80vh;
+            max-height: 80vh;
             z-index: 3;
             border-radius: 4vw;
             border: 2px solid black;
@@ -107,12 +106,25 @@
             text-align: center;
             min-width: 100%;
         }
-        #start-button {
+        #start-button, #restart-button, #back-button, #hide-info{
             min-width: 220px;
             border: 0.1vh black solid;
             font-size: 2vh;
             background: white;
             height: 5vh;
+            cursor: pointer;
+            margin-bottom: 2vh;
+        }
+        #restart-button, #back-button {
+            margin-top: 2vh;
+        }
+        #info {
+            position:absolute;
+            top: 1vh;
+            left: 1vh;
+            width: 3vw;
+            height: 3vw;
+            border-radius: 50%;
             cursor: pointer;
         }
         .info-canvas {
@@ -121,6 +133,7 @@
         }
     </style>
     <body>
+        <button id = 'info'>?</button>
         <h1 id='title'>Big Fish</h1>
         <div id = 'stats'>
             <h2>FISH EATEN <div id='count'>0</div></h2>
@@ -148,8 +161,35 @@
                 <button id = 'start-button'>Play!</button>
             </div>
         </div>
-        <div id = 'game-over'></div>
-        <div id = 'won-game'></div>
+        <div id = 'game-over'>
+            <div class = 'flex'>
+                <h3>Game Over</h3>
+                <h4>You got a little too ambitious.</h4>
+                <h4>Maybe there's a smaller pond?</h4>
+                <button id = 'restart-button'>Restart</button>
+            </div>
+        </div>
+        <div id = 'won-game'>
+            <div class = 'flex'>
+                <h3>I would say congrats but...</h3>
+                <h4>there's always a bigger pond.</h4>
+                <button id = 'back-button'>Back to Being Small</button>
+            </div>
+        </div>
+        <div id = 'info-panel'>
+                <div class = 'flex'>
+                    <h3>Big Fish</h3>
+                    <h4>Created by Mark Racette for the 2019 JS13k competition.</h4><br>
+                    <h4>Some colors contributed by @manekineko via <a href='https://www.colourlovers.com/palette/92095/Giant_Goldfish'>colour lovers.</a></h4><br>
+                    <h4>You can connect with me through <br> 
+                        <a href='mailto:markracette@gmail.com'>email</a>, 
+                        <a href='https://twitter.com/markracette'>twitter</a>, 
+                        <a href='https://instagram.com/rgb.ig'>instagram</a>, or 
+                        <a href='https://github.com/mracette'>github</a>.</h4><br>
+                    <h4>Thanks for playing!</h4><br>
+                    <button id = 'hide-info'>Close</button>
+                </div>
+            </div>
         <canvas id='canvas-background'></canvas>
         <canvas id='canvas'></canvas>
         <script src="./dist/bundle.js"></script>

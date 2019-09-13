@@ -122,7 +122,7 @@ export class Simple {
         ctx.fill(); 
         ctx.closePath();
 
-        // outter eye
+        // outer eye
         circle(
             ctx, 
             this.direction === 'left' ? this.x - this.size * 0.55 : this.x + this.size * 0.55,
